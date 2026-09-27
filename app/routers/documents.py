@@ -2,22 +2,19 @@ import os
 import uuid
 
 import boto3
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
-
 
 router = APIRouter(
     prefix="/api/documents",
     tags=["Documents"]
 )
 
-
 AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
-
 
 s3_client = boto3.client(
     "s3",
@@ -25,13 +22,13 @@ s3_client = boto3.client(
 )
 
 
-# ==============================
+# ============================================================
 # Upload Document
-# ==============================
+# ============================================================
 
 @router.post("/upload")
 def upload_document(
-    employee_id: int,
+    employee_id: int = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -58,7 +55,8 @@ def upload_document(
     s3_key = (
         f"employee-documents/"
         f"{employee_id}/"
-        f"{uuid.uuid4()}{file_extension}"
+        f"{uuid.uuid4()}"
+        f"{file_extension}"
     )
 
     try:
@@ -96,9 +94,9 @@ def upload_document(
     }
 
 
-# ==============================
-# Generate Secure Document URL
-# ==============================
+# ============================================================
+# Generate Download URL
+# ============================================================
 
 @router.get("/download/{document_id}")
 def get_document_url(
@@ -130,27 +128,25 @@ def get_document_url(
                 "Bucket": S3_BUCKET_NAME,
                 "Key": document.s3_key
             },
-            ExpiresIn=300
+            ExpiresIn=3600
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Could not generate document URL: {str(e)}"
+            detail=f"Could not generate download URL: {str(e)}"
         )
 
     return {
         "document_id": document.id,
-        "employee_id": document.employee_id,
         "file_name": document.file_name,
-        "download_url": url,
-        "expires_in_seconds": 300
+        "download_url": url
     }
 
 
-# ==============================
+# ============================================================
 # Get Employee Documents
-# ==============================
+# ============================================================
 
 @router.get("/{employee_id}")
 def get_employee_documents(
@@ -172,15 +168,16 @@ def get_employee_documents(
     documents = (
         db.query(models.Document)
         .filter(models.Document.employee_id == employee_id)
+        .order_by(models.Document.uploaded_at.desc())
         .all()
     )
 
     return [
         {
-            "document_id": document.id,
-            "employee_id": document.employee_id,
+            "id": document.id,
             "file_name": document.file_name,
-            "s3_key": document.s3_key
+            "s3_key": document.s3_key,
+            "uploaded_at": document.uploaded_at
         }
         for document in documents
     ]
