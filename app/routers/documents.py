@@ -168,7 +168,7 @@ def get_employee_documents(
     documents = (
         db.query(models.Document)
         .filter(models.Document.employee_id == employee_id)
-        .order_by(models.Document.uploaded_at.desc())
+        .order_by(models.Document.id.desc())
         .all()
     )
 
@@ -176,8 +176,7 @@ def get_employee_documents(
         {
             "id": document.id,
             "file_name": document.file_name,
-            "s3_key": document.s3_key,
-            "uploaded_at": document.uploaded_at
+            "s3_key": document.s3_key
         }
         for document in documents
     ]
