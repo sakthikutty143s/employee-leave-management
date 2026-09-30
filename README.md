@@ -1,432 +1,327 @@
 # 🏢 Employee Leave Management System
 
-A full-stack **Employee Leave Management System** built using **React, FastAPI, PostgreSQL, and AWS**.
+<p align="center">
+  <b>A Full-Stack Employee Leave Management System built with React, FastAPI, PostgreSQL and AWS</b>
+</p>
 
-This application provides a complete leave management workflow where employees can manage their profiles, check leave balances, apply for leave, upload documents, and track leave status. Managers can review, approve, and reject employee leave requests through a dedicated dashboard.
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite-61DAFB?logo=react&logoColor=black" alt="React 19 + Vite">
+  <img src="https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Cloud-AWS-FF9900?logo=amazonaws&logoColor=white" alt="AWS">
+  <img src="https://img.shields.io/badge/Monitoring-CloudWatch-232F3E?logo=amazoncloudwatch&logoColor=white" alt="CloudWatch">
+</p>
 
-The application is deployed on AWS with cloud storage, secure networking, monitoring, and email alerting.
+---
+
+## 🌟 Project Overview
+
+The **Employee Leave Management System** is a full-stack web application designed to digitize employee leave operations through separate **Employee** and **Manager** workflows.
+
+Employees can securely log in, view their profile and leave balance, apply for leave, track request status, and upload documents. Managers can review employee requests, approve or reject leave applications, and add comments.
+
+The application is deployed on AWS using a custom VPC, public/private subnets, an Application Load Balancer, private EC2 backend, private PostgreSQL RDS, Amazon S3, CloudFront, IAM and CloudWatch.
+
+> **Route 53 is intentionally not used.** The frontend is accessed through the CloudFront distribution domain.
 
 ---
 
 ## 🚀 Live Application
 
-🔗 **Live Application:**  
-https://dr363qgupncp7.cloudfront.net
+**Frontend:** https://dr363qgupncp7.cloudfront.net/
 
-🔗 **GitHub Repository:**  
-https://github.com/sakthikutty143s/employee-leave-management
+The production frontend is delivered through **Amazon CloudFront**, with `/api/*` requests routed to the FastAPI backend through an **Application Load Balancer**.
 
 ---
 
-## ✨ Features
+## 🎯 Project Objectives
 
-### 👤 Employee Features
-
-- Employee login and authentication
-- View employee profile
-- View leave balance
-- Apply for leave
-- View leave request history
-- Track leave request status
-- Upload documents
-- View uploaded documents
-- Manage employee documents
-- View dashboard summary
-
-### 👨‍💼 Manager Features
-
-- Manager login
-- View employee leave requests
-- Review pending leave requests
-- Approve leave requests
-- Reject leave requests
-- Add manager comments
-- Monitor leave request status
+- Build a real-world employee leave management workflow.
+- Implement role-based Employee and Manager access.
+- Add JWT authentication for protected operations.
+- Store application data in PostgreSQL.
+- Support leave application, approval and rejection workflows.
+- Store employee documents in Amazon S3.
+- Deploy the React frontend through CloudFront.
+- Host the FastAPI backend on a private EC2 instance.
+- Keep the PostgreSQL database private inside the VPC.
+- Monitor the deployed environment using Amazon CloudWatch.
 
 ---
 
-## 🛠️ Technology Stack
+## ✨ Key Features
+
+### 👤 Employee
+
+- 🔐 Secure login
+- 👤 Employee profile
+- 📊 Leave balance tracking
+- 📝 Leave application
+- 📋 Leave request history
+- ✅ Approved leave status
+- ⏳ Pending leave status
+- 🔴 Rejected leave status
+- 💬 Manager comments
+- 📄 Employee document upload
+- 📑 Document listing
+- 🔗 Secure document download links
+
+### 👨‍💼 Manager
+
+- 🔐 Manager login
+- 📊 Manager dashboard
+- 📋 View employee leave requests
+- 🔎 Review leave details
+- ✅ Approve leave requests
+- 🔴 Reject leave requests
+- 💬 Add manager comments
+
+---
+
+## 🧩 Technology Stack
 
 ### Frontend
 
-- React
+- React 19
 - Vite
 - JavaScript
 - HTML5
 - CSS3
+- Fetch API
 
 ### Backend
 
-- Python
+- Python 3.14+
 - FastAPI
-- SQLAlchemy
-- JWT Authentication
 - Uvicorn
+- SQLAlchemy
+- psycopg2
+- python-jose (JWT)
+- Passlib / Bcrypt
+- python-multipart
+- python-dotenv
+- Boto3
 
 ### Database
 
 - PostgreSQL
-- Amazon RDS for PostgreSQL
 
-### AWS Services
+### AWS
 
 - Amazon VPC
-- Amazon EC2
+- Public and Private Subnets
+- Internet Gateway
+- NAT Gateway
+- Route Tables
+- Security Groups
 - Application Load Balancer
-- Amazon RDS
+- Amazon EC2
+- Amazon RDS for PostgreSQL
 - Amazon S3
 - Amazon CloudFront
 - AWS IAM
-- AWS Secrets Manager
 - Amazon CloudWatch
-- Amazon SNS
-- NAT Gateway
-- Security Groups
 
 ---
 
-## 🏗️ Application Architecture
+## 🏗️ AWS Architecture
+
+<p align="center">
+  <img src="architecture/architecture-diagram.png" alt="AWS Architecture Diagram" width="100%">
+</p>
+
+### 🔄 Request Flow
 
 ```text
-                         👤 Users
-                            |
-                            v
-                    Amazon CloudFront
-                            |
-                            v
-                     React Frontend
-                       (Amazon S3)
-                            |
-                            |
-                API Requests from Frontend
-                            |
-                            v
-                  Application Load Balancer
-                            |
-                            v
-                      EC2 Backend
-                     FastAPI Application
-                            |
-              +-------------+-------------+
-              |             |             |
-              v             v             v
-        Amazon RDS      Amazon S3    Secrets Manager
-        PostgreSQL      Documents      Application
-        Database                       Secrets
-              |
-              v
-       Application Data
-
-
-                EC2 Monitoring
-                      |
-                      v
-                 CloudWatch
-                      |
-                      v
-              CloudWatch Alarm
-                  CPU ≥ 60%
-                      |
-                      v
-                    SNS
-                      |
-                      v
-               📧 Email Alert
+                         ┌────────────────────┐
+                         │    User Browser    │
+                         └──────────┬─────────┘
+                                    │ HTTPS
+                                    ▼
+                         ┌─────────────────────┐
+                         │   Amazon CloudFront │
+                         └───────┬───────┬─────┘
+                                 │       │
+                         Frontend│       │ /api/*
+                                 ▼       ▼
+                        ┌────────────┐ ┌──────────────────┐
+                        │ Amazon S3  │ │ Application Load │
+                        │ React App  │ │ Balancer         │
+                        └────────────┘ └────────┬─────────┘
+                                                │ HTTP :8000
+                                                ▼
+                                   ┌─────────────────────────┐
+                                   │ Private EC2 Backend     │
+                                   │ FastAPI + Uvicorn       │
+                                   └───────────┬─────────────┘
+                                               │
+                              ┌────────────────┴────────────────┐
+                              │                                 │
+                              ▼                                 ▼
+                    ┌──────────────────┐              ┌──────────────────┐
+                    │ RDS PostgreSQL   │              │ Amazon S3        │
+                    │ Private DB      │              │ Employee Docs   │
+                    └──────────────────┘              └──────────────────┘
 ```
 
----
+### 🌐 VPC Layout
 
-## ☁️ AWS Architecture
+```text
+employee-leave-vpc
+10.0.0.0/16
+│
+├── Public Subnet 1A  → ALB / NAT Gateway
+├── Public Subnet 1B  → ALB
+├── Private Subnet 1A → Backend EC2
+└── Private Subnet 1B → RDS PostgreSQL
+```
 
-The application uses a multi-service AWS architecture.
-
-### 🌐 Networking
-
-- Custom Amazon VPC
-- Public and private subnets
-- Route tables
-- Internet Gateway
-- NAT Gateway
-- Security Groups
-
-### 🖥️ Application Layer
-
-- React frontend deployed to Amazon S3
-- Amazon CloudFront used for frontend delivery
-- FastAPI backend deployed on Amazon EC2
-- Application Load Balancer used for backend traffic
-
-### 🗄️ Database Layer
-
-- PostgreSQL hosted on Amazon RDS
-- Database deployed in the private network
-- Backend connects securely to the PostgreSQL database
-
-### 📄 Storage
-
-- Amazon S3 used for employee document storage
-- Application supports document upload and document retrieval
-
-### 🔐 Security
-
-- JWT-based authentication
-- IAM role attached to EC2
-- AWS Secrets Manager for sensitive configuration
-- Security Groups for controlled network access
-- Private database access
-
-### 📊 Monitoring and Alerting
-
-- CloudWatch Agent installed on EC2
-- CPU metrics collected
-- Memory metrics collected
-- Disk metrics collected
-- CloudWatch CPU alarm configured
-- SNS email notification configured
+> The VPC contains public and private subnets across two Availability Zones. The current deployment uses a private EC2 backend instance behind the ALB and a private RDS PostgreSQL database.
 
 ---
 
-## 🔐 Authentication
+## ☁️ AWS Services & Responsibilities
 
-The application uses **JWT-based authentication** to protect user-specific resources.
-
-### User Roles
-
-| Role | Access |
+| AWS Service | Purpose in this Project |
 |---|---|
-| Employee | Profile, leave, documents, dashboard |
-| Manager | Leave request management |
+| **VPC** | Isolated network for the application |
+| **Public Subnets** | ALB and NAT Gateway networking |
+| **Private Subnets** | Backend EC2 and RDS resources |
+| **Internet Gateway** | Internet connectivity for public resources |
+| **NAT Gateway** | Outbound internet access for the private subnet |
+| **Route Tables** | Control public/private network routing |
+| **Security Groups** | Restrict traffic between ALB, EC2 and RDS |
+| **Application Load Balancer** | Routes API traffic to the FastAPI backend |
+| **EC2** | Hosts the FastAPI application |
+| **RDS PostgreSQL** | Stores application data privately |
+| **S3** | Stores frontend build files and employee documents |
+| **CloudFront** | HTTPS frontend delivery and caching |
+| **IAM** | Allows the EC2 role to access required AWS resources |
+| **CloudWatch** | Monitors infrastructure metrics and alarms |
 
 ---
 
-## 📋 Leave Management Workflow
+## 🔐 Security Design
 
-```text
-Employee
-   |
-   v
-Apply Leave
-   |
-   v
-PENDING
-   |
-   +------------------+
-   |                  |
-   v                  v
-APPROVED            REJECTED
-   |                  |
-   +------------------+
-            |
-            v
-     Employee Views Status
-```
-
-### Leave Request States
-
-- `PENDING`
-- `APPROVED`
-- `REJECTED`
+- JWT authentication for application access.
+- Backend EC2 is deployed in a **private subnet**.
+- RDS PostgreSQL is configured with **Public access = No**.
+- ALB accepts public web traffic and forwards API requests to the backend.
+- Backend Security Group allows TCP `8000` from the ALB Security Group.
+- RDS Security Group allows PostgreSQL `5432` from the backend Security Group.
+- EC2 uses an IAM role for S3 access instead of hard-coded AWS access keys.
+- Employee documents are stored in S3 and downloaded through application-generated presigned URLs.
+- CloudFront provides HTTPS access to the production frontend.
 
 ---
 
-## 📄 Document Management
+## 🗄️ Database Design
 
-Employees can manage documents through the application.
+The PostgreSQL database contains the following core tables:
 
-### Supported Operations
+| Table | Purpose |
+|---|---|
+| `users` | Login accounts, password hashes and roles |
+| `departments` | Department master data |
+| `employees` | Employee information |
+| `leave_types` | Leave categories and default days |
+| `leave_balances` | Employee leave balances |
+| `leave_requests` | Leave applications and approval status |
+| `documents` | Employee document metadata and S3 keys |
+| `audit_logs` | Application activity records |
 
-- Upload documents
-- Store documents in Amazon S3
-- List uploaded documents
-- Download documents
-
-### Document Flow
+### 🔗 Main Relationships
 
 ```text
-Employee
-   |
-   v
-Upload Document
-   |
-   v
-FastAPI Backend
-   |
-   v
-Amazon S3
-   |
-   v
-Document Stored Securely
+users
+  │
+  └── employees
+       │
+       ├── leave_balances ─── leave_types
+       │
+       ├── leave_requests ─── leave_types
+       │
+       └── documents
 ```
 
 ---
 
-## 📊 Monitoring with Amazon CloudWatch
+## 🔐 Authentication & Authorization
 
-The EC2 backend is monitored using the Amazon CloudWatch Agent.
-
-### Metrics Collected
-
-- CPU utilization
-- Memory utilization
-- Disk utilization
-
-### CloudWatch Agent
-
-The CloudWatch Agent collects host-level metrics every **60 seconds**.
-
-### Memory Metric
+JWT-based authentication is implemented in the FastAPI backend.
 
 ```text
-Metric:
-mem_used_percent
-
-Namespace:
-CWAgent
+Login
+  │
+  ▼
+Credentials validated by FastAPI
+  │
+  ▼
+JWT token generated
+  │
+  ▼
+Frontend sends authenticated API requests
+  │
+  ▼
+Authorization: Bearer <token>
 ```
 
-### CPU Alarm
+### Roles
 
-```text
-Alarm Name:
-employee-leave-ec2-cpu-high
+- `EMPLOYEE`
+- `MANAGER`
 
-Metric:
-AWS/EC2 → CPUUtilization
-
-Threshold:
-60%
-
-Period:
-5 minutes
-
-Evaluation Periods:
-2
-```
-
-### Alert Flow
-
-```text
-EC2
- |
- v
-CloudWatch
- |
- v
-CPU Alarm
- |
- v
-SNS
- |
- v
-Email Notification
-```
+Manager authorization is required for leave approval and rejection operations.
 
 ---
 
-## 📧 SNS Email Alerting
+## 🔌 REST API
 
-Amazon SNS is configured to send email notifications when the CloudWatch CPU alarm is triggered.
+### Authentication
 
-### Notification Flow
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register a user |
+| `POST` | `/api/auth/login` | Authenticate a user |
 
-```text
-CPU Utilization ≥ 60%
-          |
-          v
-CloudWatch Alarm
-          |
-          v
-SNS Topic
-          |
-          v
-Email Notification
-```
+### Employees
 
----
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/employees` | List employees |
+| `GET` | `/api/employees/{id}` | Get employee details |
 
-## 💻 Local Development
+### Leave Management
 
-### Prerequisites
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/leaves` | Create leave request |
+| `GET` | `/api/leaves` | List leave requests |
+| `GET` | `/api/leaves/{id}` | Get a leave request |
+| `PUT` | `/api/leaves/{id}/approve` | Approve a request |
+| `PUT` | `/api/leaves/{id}/reject` | Reject a request |
 
-Make sure the following tools are installed:
+### Documents
 
-- Python
-- Node.js
-- npm
-- PostgreSQL
-- Git
-- VS Code
-- AWS CLI
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/documents/upload` | Upload document to S3 |
+| `GET` | `/api/documents/{employee_id}` | List employee documents |
+| `GET` | `/api/documents/download/{document_id}` | Generate a presigned download URL |
 
----
+### Dashboard
 
-## 🔧 Backend Setup
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/dashboard` | Retrieve dashboard information |
 
-Open PowerShell or terminal:
+### 📚 API Documentation
 
-```bash
-cd backend
-```
-
-Create virtual environment:
-
-```bash
-python -m venv venv
-```
-
-Activate the virtual environment on Windows:
-
-```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-Install Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the FastAPI application:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-FastAPI server:
+FastAPI automatically provides Swagger UI at:
 
 ```text
-http://127.0.0.1:8000
+http://localhost:8000/docs
 ```
-
-API documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
----
-
-## 🎨 Frontend Setup
-
-Open another terminal:
-
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run the development server:
-
-```bash
-npm run dev
-```
-
-The Vite development server will provide the local frontend URL in the terminal.
 
 ---
 
@@ -437,261 +332,234 @@ employee-leave-management/
 │
 ├── backend/
 │   ├── app/
-│   │   ├── routers/
-│   │   │   ├── __init__.py
-│   │   │   ├── auth.py
-│   │   │   ├── documents.py
-│   │   │   ├── employees.py
-│   │   │   └── leaves.py
-│   │   │
 │   │   ├── __init__.py
-│   │   ├── auth.py
-│   │   ├── database.py
 │   │   ├── main.py
+│   │   ├── database.py
 │   │   ├── models.py
-│   │   └── schemas.py
+│   │   ├── schemas.py
+│   │   ├── auth.py
+│   │   └── routers/
+│   │       ├── __init__.py
+│   │       ├── auth.py
+│   │       ├── employees.py
+│   │       ├── leaves.py
+│   │       └── documents.py
 │   │
 │   ├── requirements.txt
-│   └── .gitignore
+│   └── .env
 │
 ├── frontend/
-│   ├── public/
-│   │   ├── favicon.svg
-│   │   └── icons.svg
-│   │
 │   ├── src/
-│   │   ├── assets/
-│   │   ├── App.css
 │   │   ├── App.jsx
+│   │   ├── App.css
 │   │   ├── index.css
 │   │   └── main.jsx
-│   │
-│   ├── .gitignore
-│   ├── index.html
 │   ├── package.json
-│   ├── package-lock.json
 │   └── vite.config.js
 │
-├── .gitignore
+├── architecture/
+│   ├── architecture-diagram.png
+│  
+│
+├── screenshots/
+│   ├── 01_Employee_Dashboard.png
+│   ├── 02_Manager_Dashboard.png
+│   ├── 03_Leave_Requests.png
+│   ├── 04_Leave_Approval.png
+│   ├── 05_Leave_Rejection.png
+│   ├── 06_Document_Management.png
+│   ├── 07_CloudWatch_Monitoring.png
+│   ├── 08_AWS_Architecture_Diagram.png
+│   ├── 09_VPC_Details.png
+│   ├── 10_Subnets_Route_Tables.png
+│   ├── 11_NAT_IGW.png
+│   ├── 12_Security_Groups.png
+│   ├── 13_EC2_Backend.png
+│   ├── 14_ALB_Target_Group.png
+│   ├── 15_RDS_PostgreSQL.png
+│   └── 16_S3_CloudFront.png
+│
 └── README.md
 ```
 
----
-
-## 🔑 Backend API Modules
-
-### Authentication
-
-```text
-/auth
-```
-
-Used for:
-
-- User registration
-- User login
-- Authentication
-
-### Employees
-
-```text
-/employees
-```
-
-Used for:
-
-- Employee information
-- Employee profile management
-
-### Leaves
-
-```text
-/leaves
-```
-
-Used for:
-
-- Leave application
-- Leave listing
-- Leave approval
-- Leave rejection
-
-### Documents
-
-```text
-/documents
-```
-
-Used for:
-
-- Document upload
-- Document listing
-- Document retrieval
+> Do not commit real passwords, AWS access keys, database credentials or other secret values. Keep real `.env` values outside GitHub.
 
 ---
 
-## 🧪 Testing Completed
+## 💻 Local Development
 
-The application has been tested across the main employee and manager workflows.
+### Prerequisites
 
-### Employee Testing
+- Python 3.14+
+- Node.js and npm
+- PostgreSQL 17+
+- Git
+- AWS CLI
+- Visual Studio Code
 
-- Employee login ✅
-- Employee dashboard ✅
-- Employee profile ✅
-- Leave balance ✅
-- Apply leave ✅
-- View leave history ✅
-- Upload documents ✅
-- View documents ✅
-- View dashboard summary ✅
+### 1. Clone the Repository
 
-### Manager Testing
-
-- Manager login ✅
-- Manager dashboard ✅
-- View leave requests ✅
-- Approve leave request ✅
-- Reject leave request ✅
-- Manager comments ✅
-
-### Application Workflow Testing
-
-```text
-Employee Login
-      ↓
-Apply Leave
-      ↓
-PENDING
-      ↓
-Manager Review
-      ↓
-   +--------+
-   |        |
-   ↓        ↓
-APPROVED  REJECTED
-   |        |
-   +--------+
-      ↓
-Employee Views Final Status
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd employee-leave-management
 ```
 
-### AWS Testing
+### 2. Backend Setup
 
-- S3 document upload ✅
-- S3 document listing ✅
-- CloudFront deployment ✅
-- CloudWatch Agent ✅
-- CloudWatch memory metrics ✅
-- CloudWatch CPU metrics ✅
-- CPU alarm at 60% ✅
-- SNS email subscription ✅
-- SNS alarm notification configuration ✅
+```powershell
+cd backend
+py -3.14 -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+Create a `.env` file with your own local/deployment values:
+
+```env
+DATABASE_URL=postgresql+psycopg2://<username>:<password>@<host>:5432/<database>
+AWS_REGION=ap-south-1
+S3_BUCKET_NAME=<document-bucket-name>
+SECRET_KEY=<strong-secret-key>
+```
+
+Start the backend:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+Backend:
+
+```text
+http://localhost:8000
+```
+
+Swagger:
+
+```text
+http://localhost:8000/docs
+```
+
+### 3. Frontend Setup
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend:
+
+```text
+http://127.0.0.1:5173/
+```
 
 ---
 
-## 🌐 Deployment Overview
+## 🚀 AWS Deployment
 
-### Frontend Deployment
+### Backend Deployment Flow
 
 ```text
-React Application
-       |
-       v
+Custom VPC
+   │
+   ├── Public Subnets
+   │     ├── Application Load Balancer
+   │     └── NAT Gateway
+   │
+   └── Private Subnets
+         ├── EC2 FastAPI Backend
+         └── RDS PostgreSQL
+```
+
+The backend runs as a Linux systemd service using Uvicorn on port `8000`.
+
+### Frontend Deployment Flow
+
+```text
+React + Vite
+     │
+     ▼
 npm run build
-       |
-       v
-dist/
-       |
-       v
+     │
+     ▼
 Amazon S3
-       |
-       v
+     │
+     ▼
 Amazon CloudFront
-       |
-       v
-Live Application
+     │
+     ▼
+HTTPS User Access
 ```
 
-### Backend Deployment
+### Build and Upload Frontend
+
+```powershell
+npm run build
+aws s3 sync dist s3://<frontend-bucket-name> --delete
+```
+
+### CloudFront Cache Invalidation
+
+```powershell
+aws cloudfront create-invalidation --distribution-id <distribution-id> --paths "/*"
+```
+
+---
+
+## 📄 Document Management Flow
 
 ```text
-FastAPI Application
-       |
-       v
-Application Deployment
-       |
-       v
-Amazon EC2
-       |
-       v
-Application Load Balancer
-       |
-       v
-Frontend API Requests
+Employee selects file
+        │
+        ▼
+FastAPI upload endpoint
+        │
+        ▼
+Amazon S3
+        │
+        ├── Object stored in employee-specific key path
+        │
+        ▼
+Document metadata saved in PostgreSQL
+        │
+        ▼
+Presigned download URL generated by backend
 ```
 
-### Database
+---
+
+## 🔄 Application Workflow
+
+### Employee Workflow
 
 ```text
-FastAPI Backend
-       |
-       v
-Private Network
-       |
-       v
-Amazon RDS for PostgreSQL
+Login
+  │
+  ▼
+Employee Dashboard
+  │
+  ├── Profile
+  ├── Leave Balance
+  ├── Apply Leave
+  ├── Leave History
+  └── Documents
 ```
 
----
+### Manager Workflow
 
-## 🔒 Security Considerations
-
-The application follows basic cloud security practices:
-
-- Secrets are not committed to GitHub
-- Sensitive values are stored using environment configuration / AWS Secrets Manager
-- IAM roles are used for AWS access
-- EC2 uses `AmazonSSMManagedInstanceCore`
-- EC2 uses `CloudWatchAgentServerPolicy`
-- Database access is controlled through Security Groups
-- Private database connectivity is used
-- JWT authentication protects application endpoints
-
----
-
-## 📈 Future Improvements
-
-The following improvements can be added in future versions:
-
-- Automatic employee email notifications
-- Advanced admin dashboard
-- Leave balance automation
-- Attendance integration
-- Multiple manager roles
-- Audit logging
-- Advanced CloudWatch alarms
-- Auto Scaling for backend instances
-- CI/CD pipeline using GitHub Actions
-- Infrastructure as Code using Terraform
-
----
-
-## 🎯 Project Objective
-
-The main objective of this project is to build and deploy a practical employee leave management platform using modern full-stack technologies and AWS cloud services.
-
-The project demonstrates:
-
-- Full-stack application development
-- REST API development
-- Authentication and authorization
-- PostgreSQL database integration
-- Cloud storage
-- AWS networking
-- Application deployment
-- Monitoring and alerting
-- Secure cloud architecture
+```text
+Login
+  │
+  ▼
+Manager Dashboard
+  │
+  ▼
+View Leave Requests
+  │
+  ├── Approve
+  └── Reject
+```
 
 ---
 
@@ -699,79 +567,174 @@ The project demonstrates:
 
 ### 👤 Employee Dashboard
 
-_Add employee dashboard screenshot here._
+![Employee Dashboard](screenshots/01_Employee_Dashboard.png)
 
 ### 👨‍💼 Manager Dashboard
 
-_Add manager dashboard screenshot here._
+![Manager Dashboard](screenshots/02_Manager_Dashboard.png)
 
 ### 📋 Leave Requests
 
-_Add leave request screenshot here._
+![Leave Requests](screenshots/03_Leave_Requests.png)
 
 ### ✅ Leave Approval
 
-_Add leave approval screenshot here._
+![Leave Approval](screenshots/04_Leave_Approval.png)
 
 ### 🔴 Leave Rejection
 
-_Add leave rejection screenshot here._
+![Leave Rejection](screenshots/05_Leave_Rejection.png)
 
 ### 📄 Document Management
 
-_Add document management screenshot here._
+![Document Management](screenshots/06_Document_Management.png)
 
 ### 📊 CloudWatch Monitoring
 
-_Add CloudWatch monitoring screenshot here._
+![CloudWatch Monitoring](screenshots/07_CloudWatch_Monitoring.png)
+
+### 🏗️ AWS Architecture Diagram
+
+![AWS Architecture](screenshots/08_AWS_Architecture_Diagram.png)
+
+### 🌐 VPC Details
+
+![VPC Details](screenshots/09_VPC_Details.png)
+
+### 🔗 Subnets + Route Tables
+
+![Subnets and Route Tables](screenshots/10_Subnets_Route_Tables.png)
+
+### 🚪 NAT Gateway + Internet Gateway
+
+![NAT Gateway and Internet Gateway](screenshots/11_NAT_IGW.png)
+
+### 🛡️ Security Groups
+
+![Security Groups](screenshots/12_Security_Groups.png)
+
+### 🖥️ EC2 Backend Instance
+
+![EC2 Backend](screenshots/13_EC2_Backend.png)
+
+### ⚖️ ALB + Target Group — Healthy
+
+![ALB Target Group](screenshots/14_ALB_Target_Group.png)
+
+### 🗄️ RDS PostgreSQL — Public Access No
+
+![RDS PostgreSQL](screenshots/15_RDS_PostgreSQL.png)
+
+### ☁️ S3 + CloudFront
+
+![S3 and CloudFront](screenshots/16_S3_CloudFront.png)
 
 ---
 
-## ⭐ Project Highlights
+## ✅ Testing & Validation
 
-- Full-stack React + FastAPI application
-- PostgreSQL database
-- JWT authentication
-- Employee and Manager roles
-- Leave approval workflow
-- Leave rejection workflow
-- S3 document management
-- AWS EC2 backend deployment
-- Amazon RDS PostgreSQL
+The deployed application was tested end-to-end for the main user and AWS workflows.
+
+| Test | Result |
+|---|---|
+| Employee login | ✅ Passed |
+| Manager login | ✅ Passed |
+| Employee dashboard | ✅ Passed |
+| Leave request submission | ✅ Passed |
+| Manager approval | ✅ Passed |
+| Manager rejection | ✅ Passed |
+| Leave status tracking | ✅ Passed |
+| S3 document upload | ✅ Passed |
+| Document listing | ✅ Passed |
+| Document download | ✅ Passed |
+| ALB health check | ✅ Healthy |
+| EC2 → RDS connectivity | ✅ Verified |
+| CloudFront frontend access | ✅ Passed |
+| CloudWatch monitoring | ✅ Verified |
+
+---
+
+## 📈 Monitoring
+
+Amazon CloudWatch is used to monitor the deployed backend environment.
+
+Current monitoring evidence includes:
+
+- EC2 CPU utilization
+- CloudWatch alarm status
+- Recent monitoring data
+
+This helps observe infrastructure resource usage and provides visibility into the deployed environment.
+
+---
+
+## 🌟 Project Highlights
+
+- ✅ React 19 + Vite frontend
+- ✅ Python FastAPI backend
+- ✅ PostgreSQL database
+- ✅ JWT authentication
+- ✅ Employee and Manager roles
+- ✅ Leave application workflow
+- ✅ Approval and rejection workflow
+- ✅ S3 document management
+- ✅ Private EC2 backend
+- ✅ Private RDS PostgreSQL
+- ✅ Application Load Balancer
+- ✅ VPC with public/private subnet architecture
+- ✅ NAT Gateway and Internet Gateway
+- ✅ IAM-controlled S3 access
+- ✅ CloudFront frontend delivery
+- ✅ CloudWatch monitoring
+- ✅ End-to-end production testing
+- ✅ No Route 53 dependency
+
+---
+
+## 🎓 Learning Outcomes
+
+This project provided hands-on experience with:
+
+`React` · `FastAPI` · `Python` · `PostgreSQL` · `JWT` · `AWS VPC` · `Subnets` · `Route Tables` · `Security Groups` · `NAT Gateway` · `Internet Gateway` · `EC2` · `ALB` · `RDS` · `S3` · `CloudFront` · `IAM` · `CloudWatch` · `Git` · `GitHub`
+
+---
+
+## 💰 AWS Cost Awareness
+
+AWS resources can incur charges depending on configuration and usage. For a learning environment, review resources after testing and stop or delete resources that are no longer required.
+
+Pay particular attention to:
+
+- NAT Gateway
+- RDS
+- EC2
 - Application Load Balancer
-- CloudFront frontend delivery
-- CloudWatch monitoring
-- SNS email alerts
-- AWS IAM security
-- AWS Secrets Manager
-- Secure AWS networking
+- CloudFront
+- S3
 
 ---
 
 ## 👨‍💻 Author
 
-**Sakthivel**
+**Sakthivel P**  
+**BCA Graduate | AWS & Networking Fresher**
 
-GitHub:
+### Skills
 
-https://github.com/sakthikutty143s
-
----
-
-## 🔗 Project Links
-
-### Live Application
-
-https://dr363qgupncp7.cloudfront.net
-
-### GitHub Repository
-
-https://github.com/sakthikutty143s/employee-leave-management
+`AWS` · `Networking` · `Python` · `FastAPI` · `React` · `PostgreSQL` · `Docker` · `Git` · `GitHub`
 
 ---
 
-## 📌 Project Status
+## 📌 Project Summary
 
-**Status: Deployed and Functional ✅**
+> **Employee Leave Management System** is an end-to-end cloud project combining full-stack development, JWT authentication, PostgreSQL database design, AWS networking, private infrastructure, S3 document storage, CloudFront delivery, IAM permissions and CloudWatch monitoring.
 
-The core Employee Leave Management System has been developed, tested, deployed on AWS, integrated with cloud storage and database services, and configured with CloudWatch monitoring and SNS email alerting.
+---
+
+<p align="center">
+  <b>🚀 Built with Python + React + PostgreSQL + AWS</b>
+</p>
+
+<p align="center">
+  <i>Employee Leave Management System</i>
+</p>
